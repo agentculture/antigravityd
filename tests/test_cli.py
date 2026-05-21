@@ -16,7 +16,7 @@ def test_cli_help(capsys):
     ret = main([])
     captured = capsys.readouterr()
     assert "Antigravity daemon" in captured.out
-    assert ret == 0
+    assert ret == 1
 
 
 def test_cli_serve(capsys):

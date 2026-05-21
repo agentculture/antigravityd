@@ -27,7 +27,7 @@ def main(args=None):
         return 0
     else:
         parser.print_help()
-        return 0
+        return 1
 
 
 if __name__ == "__main__":
