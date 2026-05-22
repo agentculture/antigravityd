@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pr-status.sh — one-shot status overview for a Steward PR.
+# pr-status.sh — one-shot status overview for an Antigravityd PR.
 #
 # Combines five things review feedback usually scatters across:
 #   1. PR state (open / merged / closed) + branch + author

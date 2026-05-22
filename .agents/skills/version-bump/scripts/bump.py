@@ -3,7 +3,7 @@
 
 If the package's ``__init__.py`` contains a literal ``__version__ = "..."``
 assignment, the script also rewrites that value. In repos that read
-``__version__`` from package metadata (the steward-cli convention), the
+``__version__`` from package metadata (the antigravityd convention), the
 ``__init__.py`` step is a no-op.
 
 Usage:

@@ -98,7 +98,7 @@ def test_package_not_found_error_fallback_failure(monkeypatch):
 
     import antigravityd
 
-    assert antigravityd.__version__ == "0.1.0"
+    assert antigravityd.__version__ == "0.1.1"
 
     # Reload original so that later tests run cleanly
     monkeypatch.undo()

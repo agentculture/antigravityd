@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Portability lint: catch path leaks and per-user config dependencies in
-# committed docs/configs before they ship in a PR. Steward's recurring bug
+# committed docs/configs before they ship in a PR. Antigravityd's recurring bug
 # class.
 #
 # Usage: portability-lint.sh [--all]

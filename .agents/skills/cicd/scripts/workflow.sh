@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Steward cicd workflow — thin layer over `agex pr` plus two steward
+# Antigravityd cicd workflow — thin layer over `agex pr` plus two antigravityd
 # extensions (`status`, `await`) for SonarCloud gating and triage flow.
 #
 # Subcommands:
 #   lint                   `agex pr lint --exit-on-violation`. Same rules
-#                          steward used to vendor in portability-lint.sh
-#                          (which still ships for `steward doctor`).
+#                          antigravityd used to vendor in portability-lint.sh
+#                          (which still ships for `antigravityd doctor`).
 #   open  [gh-pr flags]    `agex pr open --delayed-read "$@"`. Creates the
 #                          PR, then polls 180s for an initial briefing.
 #                          Body via --body-file PATH or stdin; --title is
@@ -21,17 +21,17 @@ set -euo pipefail
 #                          shape as the old pr-batch.sh.
 #   delta                  `agex pr delta`. Sibling alignment dump.
 #
-#   status <PR>            Steward extension: pr-status.sh — SonarCloud
+#   status <PR>            Antigravityd extension: pr-status.sh — SonarCloud
 #                          gate, OPEN issues, hotspots, unresolved
 #                          inline-thread tally, deploy-preview URL.
 #                          Source of truth for the `await` gate.
-#   await  <PR>            Steward extension: `read --wait` for the
+#   await  <PR>            Antigravityd extension: `read --wait` for the
 #                          briefing, then `status` for the gate. Exits
 #                          non-zero on SonarCloud ERROR or unresolved
 #                          threads. Tunables:
-#                            STEWARD_PR_AWAIT_WAIT (default 1800)
+#                            ANTIGRAVITYD_PR_AWAIT_WAIT (default 1800)
 #                              — seconds passed to `read --wait`.
-#                            STEWARD_PR_AWAIT_SECONDS (legacy)
+#                            ANTIGRAVITYD_PR_AWAIT_SECONDS (legacy)
 #                              — fixed pre-sleep, deprecated.
 #
 #   help                   print this message
@@ -40,9 +40,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # agex's `--agent` flag accepts only claude-code|codex|copilot|acp. The
 # workspace culture.yaml convention is `backend: claude`, so we always
-# pass --agent explicitly to insulate steward from that naming gap.
-# Override via STEWARD_AGEX_AGENT if you're running under codex/copilot/acp.
-AGEX_AGENT="${STEWARD_AGEX_AGENT:-claude-code}"
+# pass --agent explicitly to insulate antigravityd from that naming gap.
+# Override via ANTIGRAVITYD_AGEX_AGENT if you're running under codex/copilot/acp.
+AGEX_AGENT="${ANTIGRAVITYD_AGEX_AGENT:-claude-code}"
 
 require_agex() {
     if ! command -v agex >/dev/null 2>&1; then
@@ -86,13 +86,13 @@ case "$cmd" in
         PR="${1:?Usage: workflow.sh await <PR>}"
 
         # Legacy fixed-sleep escape hatch.
-        if [ -n "${STEWARD_PR_AWAIT_SECONDS:-}" ]; then
-            echo "warning: STEWARD_PR_AWAIT_SECONDS is deprecated; prefer STEWARD_PR_AWAIT_WAIT." >&2
-            echo "→ sleeping ${STEWARD_PR_AWAIT_SECONDS}s (legacy fixed-sleep) before agex pr read …" >&2
-            sleep "$STEWARD_PR_AWAIT_SECONDS"
+        if [ -n "${ANTIGRAVITYD_PR_AWAIT_SECONDS:-}" ]; then
+            echo "warning: ANTIGRAVITYD_PR_AWAIT_SECONDS is deprecated; prefer ANTIGRAVITYD_PR_AWAIT_WAIT." >&2
+            echo "→ sleeping ${ANTIGRAVITYD_PR_AWAIT_SECONDS}s (legacy fixed-sleep) before agex pr read …" >&2
+            sleep "$ANTIGRAVITYD_PR_AWAIT_SECONDS"
             WAIT_ARGS=()
         else
-            WAIT="${STEWARD_PR_AWAIT_WAIT:-1800}"
+            WAIT="${ANTIGRAVITYD_PR_AWAIT_WAIT:-1800}"
             WAIT_ARGS=(--wait "$WAIT")
         fi
 

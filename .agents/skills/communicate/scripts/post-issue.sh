@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Post a cross-repo issue. Thin wrapper around `agtag issue post` that
 # preserves this skill's stable script path so existing callers
-# (e.g. steward-cli's `announce-skill-update`) keep working unchanged.
+# (e.g. antigravityd's \`announce-skill-update\`) keep working unchanged.
 #
 # Signature: agtag resolves the signing nick from the local
 # `culture.yaml` (falling back to repo basename), so vendors do not

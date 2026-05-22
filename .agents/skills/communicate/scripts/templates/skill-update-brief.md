@@ -7,17 +7,17 @@
 
 Your repo's `.agents/skills/{{SKILL}}/` (or its older vendored
 name — see your `docs/skill-sources.md` if you keep a provenance
-ledger) is a vendored copy of the steward skill that has since
-moved on. Relevant CHANGELOG entries from steward:
+ledger) is a vendored copy of the antigravityd skill that has since
+moved on. Relevant CHANGELOG entries from antigravityd:
 
 {{CHANGELOG_BLOCK}}
 
 ## Cite locations (source of truth)
 
 - Local sibling checkout (preferred when available):
-  `../steward/.agents/skills/{{SKILL}}/`
-- Remote, if the workspace doesn't include a local steward checkout:
-  <https://github.com/agentculture/steward/tree/main/.agents/skills/{{SKILL}}>
+  `../antigravityd/.agents/skills/{{SKILL}}/`
+- Remote, if the workspace doesn't include a local antigravityd checkout:
+  <https://github.com/agentculture/antigravityd/tree/main/.agents/skills/{{SKILL}}>
 
 The directory ships with a `SKILL.md` and a `scripts/` directory
 per the AgentCulture skills-portability rule (each skill is
@@ -44,14 +44,14 @@ git checkout -b skill/{{SKILL}}-resync
 #    If your old vendored name differs (e.g. pr-review → cicd),
 #    `git rm` the old dir first.
 git rm -r .agents/skills/<old-name-if-different>   # skip if name is already {{SKILL}}
-cp -R ../steward/.agents/skills/{{SKILL}} .agents/skills/
+cp -R ../antigravityd/.agents/skills/{{SKILL}} .agents/skills/
 chmod +x .agents/skills/{{SKILL}}/scripts/*.sh 2>/dev/null || true
 
 # 2. Adapt identifiers per the existing "identifier-only adapted"
 #    pattern in your docs/skill-sources.md (if you keep one):
-#    - SKILL.md prose framing: replace "steward" with your repo
+#    - SKILL.md prose framing: replace "antigravityd" with your repo
 #      name where it identifies the consumer (NOT where it cites
-#      steward as the upstream).
+#      antigravityd as the upstream).
 #    - For any script that hard-codes a signature literal, change it
 #      to `- <your-repo> (Claude)`. (The communicate skill no longer
 #      hard-codes one — agtag resolves the nick from your local
@@ -80,9 +80,9 @@ grep -rn '<old-name-if-different>' .agents docs AGENTS.md README.md 2>/dev/null
   AgentCulture vendoring policy).
 - All scripts are executable (`chmod +x`).
 - If the skill hard-codes a signature literal anywhere, your
-  vendored copy uses your repo's signature, not `- steward (Claude)`.
+  vendored copy uses your repo's signature, not `- antigravityd (Claude)`.
 - If you keep a `docs/skill-sources.md`, it lists `{{SKILL}}` with
-  the upstream `../steward/.agents/skills/{{SKILL}}/`; no row
+  the upstream `../antigravityd/.agents/skills/{{SKILL}}/`; no row
   remains for the old vendored name.
 - `grep -rn '<old-name-if-different>' .agents docs AGENTS.md README.md`
   returns zero hits, or only historical mentions in CHANGELOG.
@@ -92,10 +92,10 @@ grep -rn '<old-name-if-different>' .agents docs AGENTS.md README.md 2>/dev/null
 
 ## References
 
-- Steward CHANGELOG (release-by-release deltas):
-  <https://github.com/agentculture/steward/blob/main/CHANGELOG.md>
+- Antigravityd CHANGELOG (release-by-release deltas):
+  <https://github.com/agentculture/antigravityd/blob/main/CHANGELOG.md>
 - `{{SKILL}}` SKILL.md:
-  <https://github.com/agentculture/steward/blob/main/.agents/skills/{{SKILL}}/SKILL.md>
+  <https://github.com/agentculture/antigravityd/blob/main/.agents/skills/{{SKILL}}/SKILL.md>
 - AgentCulture skills-portability rule (why each vendor adapts
   signature literals locally): the `communicate` SKILL.md
   "Per-channel signature rules" + "Conventions in use" sections.
