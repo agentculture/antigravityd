@@ -1,9 +1,6 @@
 ---
 name: sonarclaude
-description: >
-  Query SonarCloud API for code quality data. Use when: checking quality gate status,
-  fetching code issues or security hotspots, reviewing metrics (coverage, bugs, code smells),
-  or the user says "sonar", "quality gate", "code quality", "sonarclaude".
+description: "Query SonarCloud API for code quality, quality gate status, and security hotspots."
 ---
 
 # SonarClaude

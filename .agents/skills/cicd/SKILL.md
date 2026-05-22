@@ -1,23 +1,15 @@
 ---
 name: cicd
-description: >
-  Steward's CI/CD lane, layered on `agex pr`. Delegates lint / open /
-  read / reply / delta to agex; adds two steward extensions — `status`
-  (SonarCloud quality gate + hotspots + unresolved-thread tally) and
-  `await` (read --wait + status with non-zero exit on Sonar ERROR or
-  unresolved threads). Use when: creating PRs in steward, handling
-  review feedback, polling CI status, or the user says "create PR",
-  "review comments", "address feedback", "resolve threads". Renamed
-  from `pr-review` in steward 0.7.0; rebased on agex in 0.12.0.
+description: "Antigravityd's CI/CD lane, layered on agex pr. Handles PR lifecycle (lint, open, read, reply, delta) and includes gating checks (SonarCloud quality gate, hotspots, unresolved threads)."
 ---
 
-# CI/CD — Steward edition
+# CI/CD — Antigravityd edition
 
 `agex pr` (in `agentculture/agex-cli`) is the upstream for the
 five core PR-lifecycle verbs — `lint`, `open`, `read`, `reply`,
-`delta`. Steward used to vendor parallel scripts for each; in 0.12.0
+`delta`. Antigravityd used to vendor parallel scripts for each; in 0.12.0
 those vendored copies were dropped in favor of delegating to `agex`.
-What's left in this skill is **the steward-specific gating layer**:
+What's left in this skill is **the antigravityd-specific gating layer**:
 
 - `status` — SonarCloud quality gate, OPEN issues, hotspots, deploy
   preview URL, unresolved-inline-thread tally.
@@ -25,7 +17,7 @@ What's left in this skill is **the steward-specific gating layer**:
   Sonar `ERROR` / unresolved threads. The single command to run after
   pushing a fix when you want "wake me when this PR is triage-able."
 
-Those two are the steward unique surface today. They're filed as a
+Those two are the antigravityd unique surface today. They're filed as a
 feature ask upstream
 ([agex-cli#41](https://github.com/agentculture/agex-cli/issues/41));
 once they land they migrate out of this skill.
@@ -64,12 +56,12 @@ schema. `agex pr delta` reads the same file.
 | `workflow.sh read [PR] [--wait N]` | `agex pr read`. One-shot briefing (CI checks, SonarCloud gate + new issues, all comments, next-step footer). Pass `--wait N` to poll up to N seconds for required reviewers. |
 | `workflow.sh reply <PR>` | `agex pr reply <PR>` — batch JSONL replies (stdin) + thread resolve. agex auto-signs from `culture.yaml`. |
 | `workflow.sh delta` | `agex pr delta` — sibling alignment dump. |
-| `workflow.sh status <PR>` | **Steward extension.** `pr-status.sh` — Sonar gate, OPEN issues, hotspots, unresolved-thread breakdown, deploy preview URL. Authoritative gate for `await`. |
-| `workflow.sh await <PR>` | **Steward extension.** `agex pr read --wait` then `status`. Exits non-zero on Sonar ERROR or unresolved threads. Tunables: `STEWARD_PR_AWAIT_WAIT` (default 1800s passed to `--wait`), `STEWARD_PR_AWAIT_SECONDS` (legacy fixed pre-sleep, deprecated). |
+| `workflow.sh status <PR>` | **Antigravityd extension.** `pr-status.sh` — Sonar gate, OPEN issues, hotspots, unresolved-thread breakdown, deploy preview URL. Authoritative gate for `await`. |
+| `workflow.sh await <PR>` | **Antigravityd extension.** `agex pr read --wait` then `status`. Exits non-zero on Sonar ERROR or unresolved threads. Tunables: `ANTIGRAVITYD_PR_AWAIT_WAIT` (default 1800s passed to `--wait`), `ANTIGRAVITYD_PR_AWAIT_SECONDS` (legacy fixed pre-sleep, deprecated). |
 | `workflow.sh help` | Print the list. |
 
 You can also call `agex pr <verb>` directly — `workflow.sh` is a
-typing-saver around the same verbs. The steward `status` and `await`
+typing-saver around the same verbs. The antigravityd `status` and `await`
 extensions only have shell entry points.
 
 The vendored single-comment helper `pr-reply.sh` (plus its
@@ -77,7 +69,7 @@ The vendored single-comment helper `pr-reply.sh` (plus its
 `tests/test_pr_reply_signature.py` and `tests/test_resolve_nick.py`,
 and useful when a one-off reply doesn't merit batch JSONL. It is not
 called by `workflow.sh` anymore. The vendored `portability-lint.sh`
-is also still shipped — `steward doctor`'s portability check runs it
+is also still shipped — `antigravityd doctor`'s portability check runs it
 directly against target repos. Both are scheduled for follow-up
 migration to agex.
 
@@ -108,7 +100,7 @@ skill. The async guidance is also filed upstream
 `agex pr` emits a **"Next step:"** footer at the end of every command
 that names the right next verb (the same chain `agex learn cicd`
 documents) — follow that rather than memorizing an order. `workflow.sh
-help` mirrors the verb table when you need the steward-flavored
+help` mirrors the verb table when you need the antigravityd-flavored
 extensions (`status`, `await`) on top.
 
 Branch naming: `fix/<desc>`, `feat/<desc>`, `docs/<desc>`,
@@ -123,7 +115,7 @@ body isn't already signed.
 For every comment, decide **FIX** or **PUSHBACK** with reasoning.
 
 Default to **FIX** for: portability complaints (always valid for
-Steward — recurring bug class), test or doc requests, style nits
+Antigravityd — recurring bug class), test or doc requests, style nits
 aligned with workspace conventions.
 
 Default to **PUSHBACK** for: architecture opinions that conflict with
@@ -162,6 +154,6 @@ in the fix-up commit message.
 The `status` extension queries SonarCloud directly (it predates the
 upstream Sonar integration in `agex pr read`). Both surfaces are
 trustworthy — `agex pr read` for display in the briefing, `status` for
-the gate. Steward isn't yet a registered mesh agent, so the
+the gate. Antigravityd isn't yet a registered mesh agent, so the
 post-merge IRC ping that Culture's `pr-review` includes is still
-skipped — that returns when Steward joins the mesh.
+skipped — that returns when Antigravityd joins the mesh.

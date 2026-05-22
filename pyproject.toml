@@ -1,6 +1,6 @@
 [project]
 name = "antigravityd"
-version = "0.1.0"
+version = "0.1.1"
 description = "Antigravity daemon for delegated repository tasks and reviewable PRs."
 readme = "README.md"
 license = "MIT"

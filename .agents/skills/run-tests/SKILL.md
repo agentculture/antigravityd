@@ -1,6 +1,6 @@
 ---
 name: run-tests
-description: Run pytest with parallel execution and coverage. Use when running tests, verifying changes, or the user says "run tests", "test", or "pytest".
+description: "Run pytest with parallel execution and coverage. Use when running tests, verifying changes, or the user says \"run tests\", \"test\", or \"pytest\"."
 ---
 
 # Run Tests
