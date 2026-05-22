@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Antigravity agents local settings and skills configuration
+.agents/settings.local.json
+.agents/skills.local.yaml
+.antigravitycli/

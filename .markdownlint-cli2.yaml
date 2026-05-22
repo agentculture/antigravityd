@@ -1,0 +1,21 @@
+# markdownlint-cli2 project configuration
+# Mirrors the global user markdownlint-cli2.yaml config so CI (which runs without the
+# user's home config) behaves identically to local dev runs.
+
+config:
+  default: true
+  # MD013: Line length — disabled; we use black's 100-char line length for code
+  # and prose in AGENTS.md / skill files is naturally longer.
+  MD013: false
+  # MD060: Table pipe spacing — disabled; vendored skill files use compact style.
+  MD060: false
+  # MD024: No-duplicate-heading — Keep-a-Changelog format intentionally
+  # repeats `### Added`/`### Changed`/`### Fixed` under each release. Allow
+  # duplicates as long as they're not siblings under the same parent.
+  MD024:
+    siblings_only: true
+
+ignores:
+  - "node_modules/**"
+  - ".venv/**"
+  - ".agents/**"

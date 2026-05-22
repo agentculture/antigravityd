@@ -1,0 +1,4 @@
+agents:
+- suffix: antigravityd
+  backend: acp
+  acp_command: ["antigravityd", "serve"]
