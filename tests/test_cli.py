@@ -1,15 +1,22 @@
 import importlib
 import importlib.metadata
 import sys
+import tomllib
+from pathlib import Path
 
 import pytest
 
 from antigravityd import __version__
 from antigravityd.cli import main
 
+# Read expected version from pyproject.toml
+pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+with open(pyproject_path, "rb") as f:
+    expected_version = tomllib.load(f)["project"]["version"]
+
 
 def test_version():
-    assert __version__ == "0.1.0"
+    assert __version__ == expected_version
 
 
 def test_cli_help(capsys):
@@ -56,6 +63,33 @@ def test_package_not_found_error(monkeypatch):
         raise importlib.metadata.PackageNotFoundError
 
     monkeypatch.setattr(importlib.metadata, "version", mock_version)
+
+    if "antigravityd" in sys.modules:
+        sys.modules.pop("antigravityd")
+    if "antigravityd.cli" in sys.modules:
+        sys.modules.pop("antigravityd.cli")
+
+    import antigravityd
+
+    assert antigravityd.__version__ == expected_version
+
+    # Reload original so that later tests run cleanly
+    monkeypatch.undo()
+    if "antigravityd" in sys.modules:
+        sys.modules.pop("antigravityd")
+    if "antigravityd.cli" in sys.modules:
+        sys.modules.pop("antigravityd.cli")
+
+
+def test_package_not_found_error_fallback_failure(monkeypatch):
+    def mock_version(name):
+        raise importlib.metadata.PackageNotFoundError
+
+    def mock_load(*args, **kwargs):
+        raise ValueError("Simulated tomllib error")
+
+    monkeypatch.setattr(importlib.metadata, "version", mock_version)
+    monkeypatch.setattr(tomllib, "load", mock_load)
 
     if "antigravityd" in sys.modules:
         sys.modules.pop("antigravityd")

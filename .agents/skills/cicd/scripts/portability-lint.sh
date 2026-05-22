@@ -13,28 +13,45 @@ set -euo pipefail
 
 mode="${1:-diff}"
 case "$mode" in
-    --all) files=$(git ls-files -- ':(exclude)*.lock') ;;
-    diff|--diff) files=$(git diff --diff-filter=AMR --name-only HEAD -- ':(exclude)*.lock') ;;
-    *) echo "Usage: $(basename "$0") [--all]" >&2; exit 2 ;;
+    --all)
+        mapfile -d '' -t files < <(git ls-files -z -- ':(exclude)*.lock' 2>/dev/null)
+        ;;
+    diff|--diff)
+        mapfile -d '' -t files < <(git diff --diff-filter=AMR -z --name-only HEAD -- ':(exclude)*.lock' 2>/dev/null)
+        ;;
+    *)
+        echo "Usage: $(basename "$0") [--all]" >&2; exit 2
+        ;;
 esac
 
-[ -z "$files" ] && { echo "(no files to check)"; exit 0; }
+if [ ${#files[@]} -eq 0 ]; then
+    echo "(no files to check)"
+    exit 0
+fi
 
 # ----- Check 1: hard-coded /home/<user>/... paths -----
-hits1=$(echo "$files" | xargs -r grep -nE '/home/[a-z][a-z0-9_-]+/' 2>/dev/null || true)
+hits1=""
+if [ ${#files[@]} -gt 0 ]; then
+    hits1=$(grep -HnE '/home/[a-z][a-z0-9_-]+/' "${files[@]}" 2>/dev/null || true)
+fi
 
 # ----- Check 2: per-user dotfile *config* refs in committed docs/configs -----
 # Carve-outs (allowed, NOT flagged):
 #   - ~/.agents/skills/<x>/scripts/   vendored tool calls
 #   - ~/.culture/                     Culture mesh data this skill is supposed to read
-md_yaml=$(echo "$files" | grep -E '\.(md|ya?ml|toml|json|jsonc)$' || true)
-if [ -n "$md_yaml" ]; then
-    hits2=$(echo "$md_yaml" | xargs -r grep -nE '~/\.[A-Za-z]' 2>/dev/null \
+md_yaml=()
+for file in "${files[@]}"; do
+    if [[ "$file" =~ \.(md|ya?ml|toml|json|jsonc)$ ]]; then
+        md_yaml+=("$file")
+    fi
+done
+
+hits2=""
+if [ ${#md_yaml[@]} -gt 0 ]; then
+    hits2=$(grep -HnE '~/\.[A-Za-z]' "${md_yaml[@]}" 2>/dev/null \
         | grep -vE '~/\.agents/skills/[^[:space:]"]+/scripts/' \
         | grep -vE '~/\.culture/' \
         || true)
-else
-    hits2=""
 fi
 
 fail=0
@@ -53,5 +70,5 @@ if [ -n "$hits2" ]; then
     fail=1
 fi
 
-[ "$fail" -eq 0 ] && echo "✓ portability lint clean ($(echo "$files" | wc -l | tr -d ' ') files checked)"
+[ "$fail" -eq 0 ] && echo "✓ portability lint clean (${#files[@]} files checked)"
 exit $fail

@@ -41,6 +41,21 @@ if [[ -z "$SONAR_KEY" ]]; then
     SONAR_KEY="${SONAR_PROJECT_KEY:-${REPO%%/*}_${REPO##*/}}"
 fi
 
+# Helper to query SonarCloud API and validate JSON
+sonar_api_call() {
+    local url="$1"
+    local response
+    if ! response=$(curl -fsS --connect-timeout 10 --max-time 15 "$url" 2>&1); then
+        echo "SonarCloud request failed: $response" >&2
+        return 1
+    fi
+    if ! echo "$response" | jq -e . >/dev/null 2>&1; then
+        echo "SonarCloud returned invalid JSON: ${response:0:200}" >&2
+        return 1
+    fi
+    echo "$response"
+}
+
 # ── 1. PR header ──────────────────────────────────────────────────────────
 PR_JSON=$(gh pr view "$PR_NUMBER" --json \
     number,title,state,isDraft,mergedAt,mergedBy,baseRefName,headRefName,author,url)
@@ -120,12 +135,23 @@ printf "  %-12s %s\n"  "qodo"        "$([[ "$QODO_ISSUE" -gt 0 || "$QODO_INLINE"
 printf "  %-12s %s\n"  "Cloudflare"  "$([[ -n "$CF_URL" ]] && echo "✅ $CF_URL" || ([[ "$CFPAGES_ISSUE" -gt 0 ]] && echo "✅ ($CFPAGES_ISSUE comments)" || echo "— no deploy preview"))"
 
 # ── 4. SonarCloud quality gate + open issues ─────────────────────────────
-SONAR_QG=$(curl -s "https://sonarcloud.io/api/qualitygates/project_status?projectKey=${SONAR_KEY}&pullRequest=${PR_NUMBER}")
-SONAR_QG_STATUS=$(echo "$SONAR_QG" | jq -r '.projectStatus.status // "UNKNOWN"')
-SONAR_OPEN=$(curl -s "https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_KEY}&pullRequest=${PR_NUMBER}&statuses=OPEN,CONFIRMED&ps=1" \
-    | jq -r '.total // 0')
-SONAR_HOTSPOTS=$(curl -s "https://sonarcloud.io/api/hotspots/search?projectKey=${SONAR_KEY}&pullRequest=${PR_NUMBER}&status=TO_REVIEW&ps=1" \
-    | jq -r '.paging.total // 0')
+if SONAR_QG=$(sonar_api_call "https://sonarcloud.io/api/qualitygates/project_status?projectKey=${SONAR_KEY}&pullRequest=${PR_NUMBER}"); then
+    SONAR_QG_STATUS=$(echo "$SONAR_QG" | jq -r '.projectStatus.status // "UNKNOWN"')
+else
+    SONAR_QG_STATUS="UNKNOWN"
+fi
+
+if SONAR_OPEN_RES=$(sonar_api_call "https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_KEY}&pullRequest=${PR_NUMBER}&statuses=OPEN,CONFIRMED&ps=1"); then
+    SONAR_OPEN=$(echo "$SONAR_OPEN_RES" | jq -r '.total // 0')
+else
+    SONAR_OPEN=0
+fi
+
+if SONAR_HOTSPOTS_RES=$(sonar_api_call "https://sonarcloud.io/api/hotspots/search?projectKey=${SONAR_KEY}&pullRequest=${PR_NUMBER}&status=TO_REVIEW&ps=1"); then
+    SONAR_HOTSPOTS=$(echo "$SONAR_HOTSPOTS_RES" | jq -r '.paging.total // 0')
+else
+    SONAR_HOTSPOTS=0
+fi
 
 case "$SONAR_QG_STATUS" in
     OK)    SONAR_SYM="✅" ;;
@@ -140,8 +166,11 @@ printf "  %-12s %s Quality Gate %s, %d OPEN issue(s), %d hotspot(s)\n" \
 if [[ "$SONAR_OPEN" != "0" ]]; then
     echo
     echo "  SonarCloud OPEN issues:"
-    curl -s "https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_KEY}&pullRequest=${PR_NUMBER}&statuses=OPEN,CONFIRMED&ps=20" \
-        | jq -r '.issues[] | "    • [\(.rule)] \(.component | sub("^[^:]+:"; ""))(:\(.line // "?")) (\(.severity)) — \(.message)"'
+    if SONAR_ISSUES_RES=$(sonar_api_call "https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_KEY}&pullRequest=${PR_NUMBER}&statuses=OPEN,CONFIRMED&ps=20"); then
+        echo "$SONAR_ISSUES_RES" | jq -r '.issues[] | "    • [\(.rule)] \(.component | sub("^[^:]+:"; ""))(:\(.line // "?")) (\(.severity)) — \(.message)"'
+    else
+        echo "    (Failed to fetch SonarCloud open issues details)" >&2
+    fi
 fi
 
 # ── 5. Tally + summary ────────────────────────────────────────────────────

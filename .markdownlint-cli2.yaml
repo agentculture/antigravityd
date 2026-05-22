@@ -1,5 +1,5 @@
 # markdownlint-cli2 project configuration
-# Mirrors the global ~/.markdownlint-cli2.yaml so CI (which runs without the
+# Mirrors the global user markdownlint-cli2.yaml config so CI (which runs without the
 # user's home config) behaves identically to local dev runs.
 
 config:
